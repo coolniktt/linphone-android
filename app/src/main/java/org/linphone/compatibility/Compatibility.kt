@@ -29,6 +29,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Patterns
@@ -101,6 +102,17 @@ class Compatibility {
         }
 
         fun hasTelecomManagerFeature(context: Context): Boolean {
+            // MIUI 12 on Android 9 accepts a self-managed Telecom call and then
+            // immediately disconnects it as REJECTED. Keep Linphone's own
+            // full-screen incoming-call UI on those devices instead.
+            if (
+                Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true) &&
+                Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
+            ) {
+                Log.w("$TAG Android Telecom integration is disabled on Xiaomi Android 9 or older")
+                return false
+            }
+
             if (Version.sdkAboveOrEqual(Version.API33_ANDROID_13_TIRAMISU)) {
                 return Api33Compatibility.hasTelecomManagerFeature(context)
             } else if (Version.sdkAboveOrEqual(Version.API26_O_80)) {
