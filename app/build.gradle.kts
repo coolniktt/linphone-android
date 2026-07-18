@@ -16,6 +16,8 @@ plugins {
 
 val packageName = "ru.coolnik.sipphone"
 val useDifferentPackageNameForDebugBuild = false
+val appVersionCode = 602004
+val appVersionName = "6.2.4"
 
 val sdkPath = providers.gradleProperty("LinphoneSdkBuildDir").get()
 val googleServices = File(projectDir.absolutePath + "/google-services.json")
@@ -106,8 +108,8 @@ android {
         applicationId = packageName
         minSdk = 28
         targetSdk = 37
-        versionCode = 602003 // 6.02.003
-        versionName = "6.2.3"
+        versionCode = appVersionCode // 6.02.004
+        versionName = appVersionName
 
         manifestPlaceholders["appAuthRedirectScheme"] = packageName
 
@@ -122,7 +124,7 @@ android {
         variant.outputs
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                output.outputFileName = "linphone-android-${variant.buildType.name}-$gitVersion.apk"
+                output.outputFileName = "ulta-phone-${variant.buildType.name}-$appVersionName.apk"
             }
     }
 

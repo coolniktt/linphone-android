@@ -7,7 +7,7 @@ Firebase Cloud Messaging HTTP v1.
 ## Call path
 
 ```text
-GSM / AI agent -> Asterisk -> authenticated SIP trunk -> Flexisip -> FCM -> Coolnik Phone
+GSM / AI agent -> Asterisk -> authenticated SIP trunk -> Flexisip -> FCM -> ULTA Phone
 ```
 
 Asterisk remains the GSM/media bridge. Flexisip owns the public mobile
