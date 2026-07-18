@@ -1,0 +1,12 @@
+[Unit]
+Description=Coolnik SIP host firewall rules
+Wants=network-online.target
+After=network-online.target codex-firewall.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/docker/coolnik-sip/scripts/configure-firewall.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

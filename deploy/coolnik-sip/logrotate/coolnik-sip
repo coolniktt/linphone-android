@@ -1,0 +1,10 @@
+/opt/docker/coolnik-sip/logs/*.log {
+    daily
+    rotate 14
+    maxsize 20M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

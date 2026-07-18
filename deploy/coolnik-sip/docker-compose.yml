@@ -1,0 +1,86 @@
+services:
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4.9-alpine}
+    container_name: coolnik-sip-redis
+    network_mode: host
+    command:
+      - redis-server
+      - --bind
+      - 127.0.0.1
+      - --port
+      - "6381"
+      - --protected-mode
+      - "yes"
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+    volumes:
+      - ./data/redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-p", "6381", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  flexisip:
+    build:
+      context: .
+      args:
+        FLEXISIP_PACKAGE_VERSION: ${FLEXISIP_PACKAGE_VERSION:-2.6.0-1}
+    image: ${FLEXISIP_IMAGE:-coolnik/flexisip:2.6.0-1}
+    container_name: coolnik-flexisip
+    network_mode: host
+    command: ["--server", "proxy"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./config/flexisip.conf:/etc/flexisip/flexisip.conf:ro
+      - ./secrets/users.conf:/run/secrets/users.conf:ro
+      - ./secrets/firebase-service-account.json:/run/secrets/firebase-service-account.json:ro
+      - ./tls/letsencrypt:/etc/letsencrypt:ro
+      - ./data/flexisip:/var/opt/belledonne-communications/lib/flexisip
+      - ./logs:/var/opt/belledonne-communications/log/flexisip
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    pids_limit: 256
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD-SHELL", "test \"$$(cat /proc/1/comm)\" = flexisip && test -S /tmp/flexisip-proxy-1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  certbot:
+    image: ${CERTBOT_IMAGE:-certbot/certbot:v5.7.0}
+    profiles: ["maintenance"]
+    volumes:
+      - ./tls/letsencrypt:/etc/letsencrypt
+      - ./tls/lib:/var/lib/letsencrypt
+      - ./tls/log:/var/log/letsencrypt
+      - ./tls:/var/lib/coolnik-sip
+      - /opt/docker/npm/data/app/letsencrypt-acme-challenge:/var/www/acme
