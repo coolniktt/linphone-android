@@ -118,7 +118,9 @@ class PermissionsFragment : GenericFragment() {
             )
         }
 
-        if (ContextCompat.checkSelfPermission(
+        if (
+            Compatibility.hasTelecomManagerFeature(requireContext()) &&
+            ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.MANAGE_OWN_CALLS
             ) != PackageManager.PERMISSION_GRANTED

@@ -1,0 +1,8 @@
+[Unit]
+Description=Renew Coolnik SIP TLS certificate
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/docker/coolnik-sip/scripts/renew-certificates.sh
